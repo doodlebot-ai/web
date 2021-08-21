@@ -745,6 +745,26 @@ p {
 
 .sticky .navbar-nav .nav-item.active > a, .sticky .navbar-nav .nav-item:hover > a {
   color: #361CC1; }
+/*===== FORMS =====*/
+
+.form-submit-btn:hover {
+  opacity: 0.8;
+}
+
+.form-submit-btn {
+  margin-top: 5px;
+  padding: 5px;
+  border-radius: 1px;
+}
+
+input[type=username], input[type=password], input[type=email] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
 
 /*===== HEADER HERO =====*/
 .header-hero {
