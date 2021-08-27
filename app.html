@@ -28,6 +28,23 @@
   <!--====== Style CSS ======-->
   <link rel="stylesheet" href="assets/css/style.css">
 
+  <script>
+  function doTheDo() {
+    var ws = new WebSocket("ws://135.181.63.205/api/run");
+
+    var obj = {prompts: ["your prompt here"]};
+    var msg = msgpack.serialize(obj);
+    ws.send(msg);
+    console.log("buzz");
+
+    ws.addEventListener('message', function (event) {
+      var png_bytes = new Blob(event.data, {type: "image/png"});
+      // TODO: whatever
+      img_link.href = URL.createObjectUrl(png_bytes)
+    });
+  }
+  </script>
+
 </head>
 
 <body>
@@ -117,10 +134,11 @@
               </div>
               <div class="col-lg-6">
                 <div class="subscribe-form mt-50">
-                  <form action="/websocket-stub.js">
+                  <form onClick="return doTheDo()">
                     <input type="text" placeholder="Painting of flowers">
                     <button class="main-btn">Submit</button>
                   </form>
+
                 </div>
               </div>
             </div>
