@@ -10,3 +10,5 @@ ws.addEventListener('message', function (event) {
   // TODO: whatever
   img_link.href = URL.createObjectUrl(png_bytes)
 });
+
+window.location.replace = '/app.html'; //relative to domain
