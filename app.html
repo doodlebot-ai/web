@@ -27,24 +27,6 @@
 
   <!--====== Style CSS ======-->
   <link rel="stylesheet" href="assets/css/style.css">
-
-  <script>
-  function doTheDo() {
-    var ws = new WebSocket("ws://135.181.63.205/api/run");
-
-    var obj = {prompts: ["your prompt here"]};
-    var msg = msgpack.serialize(obj);
-    ws.send(msg);
-    console.log("buzz");
-
-    ws.addEventListener('message', function (event) {
-      var png_bytes = new Blob(event.data, {type: "image/png"});
-      // TODO: whatever
-      img_link.href = URL.createObjectUrl(png_bytes)
-    });
-  }
-  </script>
-
 </head>
 
 <body>
@@ -116,6 +98,23 @@
         </div> <!-- row -->
       </div> <!-- container -->
     </div> <!-- navbar area -->
+
+    <script>
+    function doTheDo() {
+      var ws = new WebSocket("ws://135.181.63.205/api/run");
+
+      var obj = {prompts: ["your prompt here"]};
+      var msg = msgpack.serialize(obj);
+      ws.send(msg);
+      console.log("buzz");
+
+      ws.addEventListener('message', function (event) {
+        var png_bytes = new Blob(event.data, {type: "image/png"});
+        // TODO: whatever
+        img_link.href = URL.createObjectUrl(png_bytes)
+      });
+    }
+    </script>
 
     <div id="home" class="header-hero bg_cover" style="background: black">
       <div class="container" style="height: 100vh">
