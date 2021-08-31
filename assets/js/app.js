@@ -1,5 +1,5 @@
 `use strict`;
-$(function() {
+$(() => {
 
     const ws_endpoint = "ws://api.doodlebot.ai/api/run";
     var global_ws = null;
@@ -23,19 +23,38 @@ $(function() {
         global_ws.addEventListener("open", () => {
             global_ws.send(msg);
             console.log("Sent: ",obj,msg);
+            $("#stop_btn").fadeIn("fast");
         });
+
+
+        const imgs = $("#output img");
+        let [cur, last] = [0, imgs.length - 1];
+
 
         global_ws.addEventListener('message', function (event) {
           var png_bytes = event.data;
           png_bytes.type = "image/png";
           console.log(`Recv'd: ${png_bytes.size} bytes`);
-
-          var img = document.createElement("img");
+        
+          //$(imgs[last]).hide();
+          var img = imgs[cur];
           // TODO: whatever
           img.src = URL.createObjectURL(png_bytes);
-          $("#output").append(img);
+          //$(imgs[cur]).show();
+          [last, cur] = [cur, (cur + 1) % imgs.length];
         });
       });
+
+    $("#stop_btn").click((evt) => {
+        if(global_ws != null){
+            global_ws.close();
+            global_ws = null;
+            $(evt.target).attr("disabled", true);
+            console.log("Websocket closed");
+        } else {
+            console.error("Could not close websocket");
+        }
+    });
 
 
     // function openSocket(url) {
