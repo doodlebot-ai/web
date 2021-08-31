@@ -18,7 +18,7 @@ $(function() {
         }
         var prompt = $("#prompt input").val();
 
-        var obj = { prompts: [prompt] };
+        var obj = { prompts: [prompt+" by james gurney"] };
         var msg = msgpack.serialize(obj);
         global_ws.addEventListener("open", () => {
             global_ws.send(msg);
