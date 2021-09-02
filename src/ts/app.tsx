@@ -2,39 +2,152 @@ import msgpack from "@ygoe/msgpack";
 
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
+import {Row, Col, Container, Button, Form, InputGroup, SplitButton, ToggleButton, FormText, FormControl} from "react-bootstrap";
+import { Toggle } from "react-bootstrap/lib/Dropdown";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
+import {faPlus, faMinus} from "@fortawesome/free-solid-svg-icons";
+import { ThemeConsumer } from "react-bootstrap/esm/ThemeProvider";
+import { toHtml } from "@fortawesome/fontawesome-svg-core";
 
 class PromptApp extends Component {
     render() {
-        return <div className="row justify-content-center">
-        <div className="col-lg-8">
+        return <Container>
+        <Row className="justify-content-center">
+        <Col lg="8">
           <div className="header-hero-content text-center">
             <h2 className="header-title wow fadeInUp" data-wow-duration="1.3s" data-wow-delay="0.5s">Work with Alicia</h2>
             <h3 className="header-sub-title wow fadeInUp" data-wow-duration="1.3s" data-wow-delay="0.2s"><br/>Ask her to create an image for you.</h3>
           </div>
-          <div className="row">
-            <div className="col-lg-6">
+          <Row>
+            <Col lg="6">
               <div className="subscribe-content mt-45">
                 <h2 className="subscribe-title">We recommend plain English<span>With many keywords</span></h2>
               </div>
-            </div>
-            <div className="col-lg-6">
-              <div className="subscribe-form mt-50">
-                <form id="prompt">
-                  <ol className="prompt_list">
-                    <input type="text" placeholder="Painting of flowers"/>
-                  </ol>
-                  <button className="main-btn" autoComplete="off">Submit</button>
-                </form>                 
-              </div>
-              <div className="mt-20">
-                <button id="stop_btn" className="main-btn" autoComplete="off" style={{display: "none", width: "100%"}}>Stop</button>
-              </div>
-            </div>
-          </div>
-        </div>
+            </Col>
+            <Col lg="6">
+              <PromptForm/>
+            </Col>
+          </Row>
+        </Col>
+      </Row>
+      <Row className="justify-content-center">
         <code><div id="output"><img/></div></code>
-      </div>;
+      </Row>
+      </Container>
     }
+}
+
+type PromptTextEvt = {
+  key: number
+}
+
+type FormControlElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+
+interface PromptTextProps{
+  key: number
+  showCheckbox: boolean;
+  showButton: boolean;
+  isAdd: boolean;
+  state: PromptTextState;
+  onCheckChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onFormChange?: (event: React.ChangeEvent<FormControlElement>) => void;
+  onButtonClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+}
+
+interface PromptTextState{
+  enabled: boolean;
+  value: string;
+}
+
+class PromptText extends Component<PromptTextProps, {}> {
+
+  _onCheck(evt: React.ChangeEvent<HTMLInputElement>) {
+    if(this.props.onCheckChange)
+      this.props.onCheckChange(evt); 
+  }
+  
+  _onForm(evt: React.ChangeEvent<FormControlElement>){
+    if(this.props.onFormChange)
+      this.props.onFormChange(evt); 
+  }
+
+  _onButton(evt: React.MouseEvent<HTMLButtonElement, MouseEvent>){
+    if(this.props.onButtonClick)
+      this.props.onButtonClick(evt); 
+  }
+
+  render() {
+    return <InputGroup>
+      {this.props.showCheckbox &&
+        <InputGroup.Checkbox hidden={!this.props.showCheckbox} checked={this.props.state.enabled} onChange={this._onCheck.bind(this)} />
+      }
+      <FormControl placeholder="A new prompt" onChange={this._onForm.bind(this)} value={this.props.state.value}/>
+      <Button variant="secondary" hidden={!this.props.showButton} onClick={this._onButton.bind(this)}>
+        <FontAwesomeIcon icon={this.props.isAdd ? faPlus : faMinus}/>
+      </Button>
+    </InputGroup>
+  }
+}
+
+interface ParamState {
+  prompts: PromptTextState[];
+}
+
+class PromptForm extends Component<{}, ParamState> {
+  state: ParamState = {
+    prompts: [
+      {enabled: true, value: ""},
+      {enabled: true, value: ""}
+    ],
+  }
+
+  togglePrompt(index: number, changed: React.ChangeEvent<HTMLInputElement>) {
+    const prompts = this.state.prompts;
+    const prompt = prompts[index];
+    if(prompt){
+      prompt.enabled = !prompt.enabled;
+      changed.target.checked = prompt.enabled;
+    }
+    this.setState({...this.state, prompts: prompts});
+  }
+
+  updatePrompt(index: number, event: React.ChangeEvent<FormControlElement>) {
+    const prompts = this.state.prompts;
+    const prompt = prompts[index];
+    if(prompt){
+      prompt.value = event.target.value;
+    }
+    this.setState({...this.state, prompts: prompts});
+  }
+  addsubPrompt(index: number, event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
+    const prompts = this.state.prompts;
+    const prompt = prompts[index];
+    if(!prompt) return;
+    if(index === prompts.length - 1){
+      prompts.push({enabled: true, value: ""});
+    } else {
+      prompts.splice(index, 1);
+    }
+    this.setState({...this.state, prompts: prompts});
+  }
+
+
+  render() {
+    return <Form>
+      {this.state.prompts.map((st,idx) => 
+        <PromptText key={idx} showCheckbox={idx > 0} 
+          showButton={true} 
+          isAdd={idx === this.state.prompts.length - 1}
+          state={st} 
+          onCheckChange={this.togglePrompt.bind(this,idx)}
+          onFormChange={this.updatePrompt.bind(this,idx)}
+          onButtonClick={this.addsubPrompt.bind(this,idx)}
+        />
+      )}
+      <Form.Control type="button" className="main-btn" hidden value="Submit"></Form.Control>
+    </Form>
+  }
+
 }
 
 // `use strict`;
@@ -97,8 +210,9 @@ class PromptApp extends Component {
 // });
 
 let pc = document.getElementById("prompt_app");
+let p = <PromptApp></PromptApp>
 if(pc){
-    ReactDOM.render(<PromptApp></PromptApp>, pc);
+    ReactDOM.render(p, pc);
 } else {
     console.error("Could not find container to bind app");
 }
