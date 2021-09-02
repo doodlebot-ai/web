@@ -11,22 +11,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!--====== Favicon Icon ======-->
-  <link rel="shortcut icon" href="../../assets/images/favicon.png" type="image/png">
+  <!-- <link rel="shortcut icon" href="../../assets/images/favicon.png" type="image/png"> -->
 
-  <!--====== Animate CSS ======-->
-  <link rel="stylesheet" href="../../assets/css/animate.css">
-
-  <!--====== Line Icons CSS ======-->
-  <link rel="stylesheet" href="../../assets/css/LineIcons.2.0.css">
-
-  <!--====== Bootstrap CSS ======-->
-  <link rel="stylesheet" href="../../assets/css/bootstrap-4.5.0.min.css">
-
-  <!--====== Default CSS ======-->
-  <link rel="stylesheet" href="../../assets/css/default.css">
-
-  <!--====== Style CSS ======-->
-  <link rel="stylesheet" href="../../assets/css/style.css">
 </head>
 
 <body>
@@ -101,40 +87,8 @@
     </div> <!-- navbar area -->
 
     <div id="home" class="header-hero bg_cover" style="background: black">
-      <div class="container" style="height: 100vh">
-        <div class="row justify-content-center">
-          <div class="col-lg-8">
-            <div class="header-hero-content text-center">
-              <h2 class="header-title wow fadeInUp" data-wow-duration="1.3s" data-wow-delay="0.5s">Work with Alicia</h2>
-              <h3 class="header-sub-title wow fadeInUp" data-wow-duration="1.3s" data-wow-delay="0.2s"><br>Ask her to
-                create an image for you.</h3>
-              <!--<p class="text wow fadeInUp" data-wow-duration="1.3s" data-wow-delay="0.8s">titlecase</p>-->
-            </div> <!-- header hero content -->
-            <div class="row">
-              <div class="col-lg-6">
-                <div class="subscribe-content mt-45">
-                  <h2 class="subscribe-title">We recommend plain English<span>With many keywords</span></h2>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="subscribe-form mt-50">
-                  <form id="prompt">
-                    <ol class="prompt_list">
-                      <input type="text" placeholder="Painting of flowers">
-                    </ol>
-                    <button class="main-btn" autocomplete="off">Submit</button>
-                  </form>                 
-                </div>
-                <div class="mt-20">
-                  <button id="stop_btn" class="main-btn" autocomplete="off" style="display: none; width: 100%;">Stop</button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <code><div id="output"><img/></div></code>
-        </div>
+      <div id="prompt_app" class="container" style="height: 100vh">
       </div> <!-- row -->
-
     </div> <!-- container -->
     <div id="particles-1" class="particles"></div>
     </div> <!-- header hero -->
@@ -161,10 +115,6 @@
 -->
 
   <!--====== PART ENDS ======-->
-
-
-  <script src="../ts/main.js"></script>
-  <script src="../ts/app.js"></script>
 
 </body>
 

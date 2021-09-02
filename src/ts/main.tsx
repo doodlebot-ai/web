@@ -1,8 +1,13 @@
 import WOW from "wow.js";
-import "bootstrap";
-import "jquery.counterup";
 import $ from "jquery";
-import { particlesJS } from "particles.js";
+import "particles.js";
+
+import db_logo from "../../assets/images/doodlebot.png";
+import "bootstrap/dist/css/bootstrap.css";
+import "../../assets/css/animate.css";
+import "../../assets/css/LineIcons.2.0.css";
+import "../../assets/css/style.css";
+
 
 $(function () {
 
@@ -10,7 +15,7 @@ $(function () {
 
     //===== Prealoder
 
-    $('.preloader').delay(500).fadeOut(500);
+    $('.preloader').delay(500).fadeOut(200);
 
 
     //===== Sticky
@@ -20,10 +25,10 @@ $(function () {
         if (!scroll) return; 
         if (scroll < 20) {
             $(".navbar-area").removeClass("sticky");
-            $(".navbar .navbar-brand img").attr("src", "assets/images/doodlebot.png");
+            $(".navbar .navbar-brand img").attr("src", db_logo);
         } else {
             $(".navbar-area").addClass("sticky");
-            $(".navbar .navbar-brand img").attr("src", "assets/images/doodlebot.png");
+            $(".navbar .navbar-brand img").attr("src", db_logo);
         }
     });
 
@@ -36,17 +41,17 @@ $(function () {
     $(window).scroll(function () {
         let scrollbarLocation = $(this).scrollTop();
 
-        if (scrollbarLocation) {
-            scrollLink.each(function () {
-                let sectionOffset = $(this).offset();
-                if (sectionOffset){
-                    if ((sectionOffset.top - 73) <= (scrollbarLocation as number)) {
-                        $(this).parent().addClass('active');
-                        $(this).parent().siblings().removeClass('active');
-                    }
+
+        scrollLink.each(function () {
+            if (!scrollbarLocation) return;
+            let sectionOffset = $(this).offset();
+            if (sectionOffset){
+                if ((sectionOffset.top - 73) <= scrollbarLocation) {
+                    $(this).parent().addClass('active');
+                    $(this).parent().siblings().removeClass('active');
                 }
-            });
-        }
+            }
+        });
     });
 
 
@@ -67,10 +72,10 @@ $(function () {
 
     //===== Counter Up
 
-    $('.counter').counterUp({
-        delay: 10,
-        time: 3000
-    });
+    // $('.counter').counterUp({
+    //     delay: 10,
+    //     time: 3000
+    // });
 
 
 
