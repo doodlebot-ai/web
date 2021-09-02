@@ -1,3 +1,8 @@
+import WOW from "wow.js";
+import "jquery.counterup";
+import $ from "jquery";
+import { particlesJS } from "particles.js";
+
 $(function () {
 
     "use strict";
@@ -10,7 +15,8 @@ $(function () {
     //===== Sticky
 
     $(window).on('scroll', function (event) {
-        var scroll = $(window).scrollTop();
+        let scroll = $(window).scrollTop();
+        if (!scroll) return; 
         if (scroll < 20) {
             $(".navbar-area").removeClass("sticky");
             $(".navbar .navbar-brand img").attr("src", "assets/images/doodlebot.png");
@@ -24,20 +30,22 @@ $(function () {
 
     //===== Section Menu Active
 
-    var scrollLink = $('.page-scroll');
+    let scrollLink = $('.page-scroll');
     // Active link switching
     $(window).scroll(function () {
-        var scrollbarLocation = $(this).scrollTop();
+        let scrollbarLocation = $(this).scrollTop();
 
-        scrollLink.each(function () {
-
-            var sectionOffset = $(this.hash).offset().top - 73;
-
-            if (sectionOffset <= scrollbarLocation) {
-                $(this).parent().addClass('active');
-                $(this).parent().siblings().removeClass('active');
-            }
-        });
+        if (scrollbarLocation) {
+            scrollLink.each(function () {
+                let sectionOffset = $(this).offset();
+                if (sectionOffset){
+                    if ((sectionOffset.top - 73) <= (scrollbarLocation as number)) {
+                        $(this).parent().addClass('active');
+                        $(this).parent().siblings().removeClass('active');
+                    }
+                }
+            });
+        }
     });
 
 
@@ -69,7 +77,9 @@ $(function () {
 
     // Show or hide the sticky footer button
     $(window).on('scroll', function (event) {
-        if ($(this).scrollTop() > 600) {
+        let top = $(this).scrollTop();
+        if(top == undefined) return;
+        if (top > 600) {
             $('.back-to-top').fadeIn(200);
         } else {
             $('.back-to-top').fadeOut(200);

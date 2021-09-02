@@ -1,0 +1,57 @@
+{
+  "name": "doodlebot-web",
+  "version": "1.0.0",
+  "description": "Web interface for doodlebot",
+  "main": "./static/index.html",
+  "scripts": {
+    "build": "webpack",
+    "serve": "webpack serve"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/doodlebot-ai/web.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/doodlebot-ai/web/issues"
+  },
+  "homepage": "https://github.com/doodlebot-ai/web#readme",
+  "devDependencies": {
+    "@babel/preset-env": "^7.15.0",
+    "@babel/preset-react": "^7.14.5",
+    "@babel/preset-typescript": "^7.15.0",
+    "@babel/runtime": "^7.15.3",
+    "@types/jquery": "^3.5.6",
+    "@types/react": "^17.0.19",
+    "@types/react-dom": "^17.0.9",
+    "babel-loader": "^8.2.2",
+    "copy-webpack-plugin": "^9.0.1",
+    "css-loader": "^6.2.0",
+    "file-loader": "^6.2.0",
+    "html-loader": "^2.1.2",
+    "html-webpack-plugin": "^5.3.2",
+    "raw-loader": "^4.0.2",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "style-loader": "^3.2.1",
+    "ts-loader": "^9.2.5",
+    "typescript": "^4.4.2",
+    "webpack": "^5.51.1",
+    "webpack-cli": "^4.8.0",
+    "webpack-dev-server": "^4.1.0"
+  },
+  "dependencies": {
+    "@popperjs/core": "^2.9.3",
+    "@ygoe/msgpack": "^1.0.3",
+    "bootstrap": "^5.1.0",
+    "condense": "^0.0.1",
+    "dts-gen": "^0.6.0",
+    "jquery": "^3.6.0",
+    "particles.js": "^2.0.0",
+    "slick-carousel": "^1.8.1",
+    "tern": "^0.24.3",
+    "waypoints": "^4.0.1",
+    "wow.js": "^1.2.2"
+  }
+}
