@@ -2,10 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const webpack = require('webpack');
 const CssExtract = require('mini-css-extract-plugin')
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
-const {CleanWebpackPlugin} = require('clean-webpack-plugin');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 module.exports = {
     mode: "development",
@@ -36,9 +33,6 @@ module.exports = {
                 test: /\.html$/,
                 use:{
                     loader: 'html-loader',
-                    options: {
-                        attributes: true
-                    }
                 }
             },
             {
@@ -78,7 +72,6 @@ module.exports = {
         new HTMLWebpackPlugin({
             template: 'src/html/register.html',
             attributes: true,
-        }),
-        new ForkTsCheckerWebpackPlugin()
+        })
     ],
 }

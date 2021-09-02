@@ -1,7 +1,5 @@
 node_modules
-src/doodler.js
-static/doodler.js
-static/spectrum.css
+static
 
 ## FROM GENERAL CATCH-ALL GITIGNORE ##
 # Logs
