@@ -1,7 +1,6 @@
 const path = require('path');
 const fs = require('fs');
 const webpack = require('webpack');
-const CssExtract = require('mini-css-extract-plugin')
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
@@ -13,7 +12,13 @@ module.exports = {
         liveReload: true,
         writeToDisk: true,
     },
-    entry: ['./src/html/index.html'],
+    entry: ["./src/html/404.html",
+    "./src/html/app.html",
+    "./src/html/demo.html",
+    "./src/html/demo2.html",
+    "./src/html/index.html",
+    "./src/html/login.html",
+    "./src/html/register.html"],
     devtool: 'inline-source-map',
     output: {
         path: path.resolve(__dirname, 'static'),
@@ -36,42 +41,36 @@ module.exports = {
                 }
             },
             {
+                test: /\.(png|svg|jpg|jpeg|gif)$/i,
+                type: 'asset/resource',
+            },
+            {
                 test: /\.css$/,
-                use:[CssExtract.loader,'css-loader']
+                use:['style-loader','css-loader']
             }
         ]
     },
-    plugins: [
-        new CssExtract({
-            filename: "[name].css"
-        }),
-        new HTMLWebpackPlugin({
-            template: 'src/html/index.html',
-            attributes: true,
-        }),
-        new HTMLWebpackPlugin({
-            template: 'src/html/404.html',
-            attributes: true,
-        }),
-        new HTMLWebpackPlugin({
-            template: 'src/html/app.html',
-            attributes: true,
-        }),
-        new HTMLWebpackPlugin({
-            template: 'src/html/login.html',
-            attributes: true,
-        }),
-        new HTMLWebpackPlugin({
-            template: 'src/html/demo.html',
-            attributes: true,
-        }),
-        new HTMLWebpackPlugin({
-            template: 'src/html/demo2.html',
-            attributes: true,
-        }),
-        new HTMLWebpackPlugin({
-            template: 'src/html/register.html',
-            attributes: true,
-        })
-    ],
+    // plugins: [
+    //     new HTMLWebpackPlugin({
+    //         template: 'src/html/index.html',
+    //     }),
+    //     new HTMLWebpackPlugin({
+    //         template: 'src/html/404.html',
+    //     }),
+    //     new HTMLWebpackPlugin({
+    //         template: 'src/html/app.html',
+    //     }),
+    //     new HTMLWebpackPlugin({
+    //         template: 'src/html/login.html',
+    //     }),
+    //     new HTMLWebpackPlugin({
+    //         template: 'src/html/demo.html',
+    //     }),
+    //     new HTMLWebpackPlugin({
+    //         template: 'src/html/demo2.html',
+    //     }),
+    //     new HTMLWebpackPlugin({
+    //         template: 'src/html/register.html',
+    //     })
+    // ],
 }

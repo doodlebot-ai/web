@@ -1,4 +1,5 @@
 import WOW from "wow.js";
+import "bootstrap";
 import "jquery.counterup";
 import $ from "jquery";
 import { particlesJS } from "particles.js";
