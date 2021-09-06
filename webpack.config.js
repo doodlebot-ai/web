@@ -47,11 +47,11 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                use: [CSSExtract.loader, 'css-loader'],
+                use: [CSSExtract.loader, 'css-loader', 'postcss-loader'],
             },
             {
                 test: /\.scss$/,
-                use: [CSSExtract.loader, 'css-loader', 'sass-loader'],
+                use: [CSSExtract.loader, 'css-loader', 'postcss-loader', 'sass-loader'],
             },
         ]
     },

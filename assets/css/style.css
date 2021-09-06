@@ -119,6 +119,10 @@ p {
   margin: 0px;
 }
 
+.main_bg {
+  background-image: url(../../assets/images/banner-bg.svg);
+}
+
 .bg_cover {
   background-position: center center;
   background-size: cover;

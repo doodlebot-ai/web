@@ -7,6 +7,7 @@ import "bootstrap/scss/bootstrap.scss";
 import db_logo from "../../assets/images/doodlebot.png";
 import "../../assets/css/animate.css";
 import "../../assets/css/LineIcons.2.0.css";
+import "../../assets/css/default.css";
 import "../../assets/css/style.css";
 
 
