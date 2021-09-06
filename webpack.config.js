@@ -9,7 +9,7 @@ module.exports = {
         compress: true,
         port: 9000,
         liveReload: true,
-        static: 'static',
+        static: "dist",
         allowedHosts: [
             "doodlebot.ai",
             "api.doodlebot.ai"
@@ -24,8 +24,11 @@ module.exports = {
     },
     devtool: 'inline-source-map',
     output: {
-        path: path.resolve(__dirname, 'static'),
+        path: path.resolve(__dirname, 'dist'),
         publicPath: process.env.ASSET_PATH || './',
+    },
+    resolve: {
+        extensions: [".ts",".tsx",".js",".jsx"]
     },
     module: {
         rules: [{
@@ -36,9 +39,10 @@ module.exports = {
                     {
                     loader: "babel-loader",
                     options: {
+                        cacheDirectory: true,
                         presets: ['@babel/preset-env','@babel/preset-react','@babel/preset-typescript'],
-                        plugins: ["@babel/transform-typescript",
-                        "@babel/transform-runtime",
+                        plugins: ["@babel/plugin-transform-typescript",
+                        "@babel/plugin-transform-runtime",
                         "@babel/proposal-object-rest-spread"],
                     }
 
@@ -63,37 +67,37 @@ module.exports = {
     plugins: [
         new css_extract(),
         new HTMLWebpackPlugin({
-            filename: "index.html",
-            template: 'src/html/index.html',
+            filename: path.resolve("dist","index.html"),
+            template: path.resolve('src/html/index.html'),
             excludeChunks: ["app"],
         }),
         new HTMLWebpackPlugin({
-            filename: "404.html",
-            template: 'src/html/404.html',
+            filename: path.resolve("dist","404.html"),
+            template: path.resolve('src/html/404.html'),
             excludeChunks: ["app"],
         }),
         new HTMLWebpackPlugin({
-            filename: "app.html",
-            template: 'src/html/app.html',
+            filename: path.resolve("dist","app.html"),
+            template: path.resolve('src/html/app.html'),
         }),
         new HTMLWebpackPlugin({
-            filename: "login.html",
-            template: 'src/html/login.html',
+            filename: path.resolve("dist","login.html"),
+            template: path.resolve('src/html/login.html'),
             excludeChunks: ["app"],
         }),
         new HTMLWebpackPlugin({
-            filename: "demo.html",
-            template: 'src/html/demo.html',
+            filename: path.resolve("dist","demo.html"),
+            template: path.resolve('src/html/demo.html'),
             excludeChunks: ["app"],
         }),
         new HTMLWebpackPlugin({
-            filename: "demo2.html",
-            template: 'src/html/demo2.html',
+            filename: path.resolve("dist","demo2.html"),
+            template: path.resolve('src/html/demo2.html'),
             excludeChunks: ["app"],
         }),
         new HTMLWebpackPlugin({
-            filename: "register.html",
-            template: 'src/html/register.html',
+            filename: path.resolve("dist","register.html"),
+            template: path.resolve('src/html/register.html'),
             excludeChunks: ["app"],
         })
     ],

@@ -1,22 +1,70 @@
 import msgpack from "@ygoe/msgpack";
 
-import React, { Component } from "react";
+import React, { Component, useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import {Row, Col, Container, Button, Form, InputGroup, SplitButton, ToggleButton, FormText, FormControl} from "react-bootstrap";
-import { Toggle } from "react-bootstrap/lib/Dropdown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import {faPlus, faMinus} from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faMinus} from "@fortawesome/free-solid-svg-icons";
 import { ThemeConsumer } from "react-bootstrap/esm/ThemeProvider";
-import { toHtml } from "@fortawesome/fontawesome-svg-core";
 
-class PromptApp extends Component {
-    render() {
-        return <Container>
+interface PromptMsg {
+  prompts: string[];
+  cutn?: number;
+  cut_pow?: number;
+  mse_weight?: number;
+  mse_decay?: number;
+  mse_decay_every?: number;
+  step_size?: number;
+  noise_fac?: number;
+  clip_name?: string;
+  vqgan_name?: string;
+  width?: number;
+  height?: number;
+}
+
+const API_ENDPOINT = "ws://api.doodlebot.ai/api/run";
+
+const PromptApp: React.FC<{}> = () => {
+
+  const [running, setRunning] = useState<boolean>(false);
+  const [ws, setWs] = useState<WebSocket | null>(null);
+  const [image_src, setSrc] = useState<string>("");
+
+  useEffect(() => {
+      if(ws == null){
+        console.error("Websocket not initialized");
+        return () => {};
+      }
+
+      ws.onmessage = msg => {
+        let png_bytes = msg.data as Blob;
+        let src = URL.createObjectURL(png_bytes.slice(undefined, undefined, "image/png"));
+        if(image_src.length > 0){
+          URL.revokeObjectURL(image_src);
+        }
+        setSrc(src);
+      }
+
+      ws.onerror = err => {
+        console.error("Websocket errored: ", err);
+        ws?.close();
+        setWs(null);
+        setRunning(false);
+      }
+    
+      return () => {
+        ws?.close();
+        setWs(null);
+        setRunning(false);
+      }
+    }, [ws]);
+
+
+    return <Container>
         <Row className="justify-content-center">
         <Col lg="8">
           <div className="header-hero-content text-center">
-            <h2 className="header-title wow fadeInUp" data-wow-duration="1.3s" data-wow-delay="0.5s">Work with Alicia</h2>
-            <h3 className="header-sub-title wow fadeInUp" data-wow-duration="1.3s" data-wow-delay="0.2s"><br/>Ask her to create an image for you.</h3>
+
           </div>
           <Row>
             <Col lg="6">
@@ -25,20 +73,28 @@ class PromptApp extends Component {
               </div>
             </Col>
             <Col lg="6">
-              <PromptForm/>
+              <PromptForm running={running} onSubmit={(evt: ParamState) => {
+                let ws = new WebSocket(API_ENDPOINT);
+                setWs(ws);
+                setRunning(true);
+                const msg: PromptMsg = {
+                  width: evt.width,
+                  height: evt.height,
+                  prompts: evt.prompts.filter((e) => e.enabled).map((a) => a.value),
+                };
+                ws.onopen = evt => {
+                  const bin = msgpack.serialize(msg);
+                  ws?.send(bin);
+                };
+              }}/>
             </Col>
           </Row>
         </Col>
       </Row>
       <Row className="justify-content-center">
-        <code><div id="output"><img/></div></code>
+      {ws != null && <div id="output">{ws?.readyState == WebSocket.OPEN ? <img src={image_src}/> : "Loading..."}</div>}
       </Row>
-      </Container>
-    }
-}
-
-type PromptTextEvt = {
-  key: number
+      </Container>;
 }
 
 type FormControlElement = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -49,6 +105,7 @@ interface PromptTextProps{
   showButton: boolean;
   isAdd: boolean;
   state: PromptTextState;
+  disabled: boolean;
   onCheckChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onFormChange?: (event: React.ChangeEvent<FormControlElement>) => void;
   onButtonClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
@@ -79,10 +136,10 @@ class PromptText extends Component<PromptTextProps, {}> {
   render() {
     return <InputGroup>
       {this.props.showCheckbox &&
-        <InputGroup.Checkbox hidden={!this.props.showCheckbox} checked={this.props.state.enabled} onChange={this._onCheck.bind(this)} />
+        <InputGroup.Checkbox disabled={this.props.disabled} hidden={!this.props.showCheckbox} checked={this.props.state.enabled} onChange={this._onCheck.bind(this)} />
       }
-      <FormControl placeholder="A new prompt" onChange={this._onForm.bind(this)} value={this.props.state.value}/>
-      <Button variant="secondary" hidden={!this.props.showButton} onClick={this._onButton.bind(this)}>
+      <FormControl placeholder="A new prompt" disabled={this.props.disabled} onChange={this._onForm.bind(this)} value={this.props.state.value}/>
+      <Button variant="secondary" disabled={this.props.disabled} hidden={!this.props.showButton} onClick={this._onButton.bind(this)}>
         <FontAwesomeIcon icon={this.props.isAdd ? faPlus : faMinus}/>
       </Button>
     </InputGroup>
@@ -91,14 +148,40 @@ class PromptText extends Component<PromptTextProps, {}> {
 
 interface ParamState {
   prompts: PromptTextState[];
+  cutn: number;
+  cut_pow: number;
+  mse_weight: number;
+  mse_decay: number;
+  mse_decay_every: number;
+  step_size: number;
+  noise_fac: number;
+  clip_name: string;
+  vqgan_name: string;
+  width: number;
+  height: number;
 }
 
-class PromptForm extends Component<{}, ParamState> {
+interface PromptFormProps {
+  running: boolean;
+  onSubmit: (state: ParamState) => void; 
+}
+
+class PromptForm extends Component<PromptFormProps, ParamState> {
   state: ParamState = {
     prompts: [
-      {enabled: true, value: ""},
-      {enabled: true, value: ""}
+      { enabled: false, value: "" }
     ],
+    cutn: 0,
+    cut_pow: 0,
+    mse_weight: 0,
+    mse_decay: 0,
+    mse_decay_every: 0,
+    step_size: 0,
+    noise_fac: 0,
+    clip_name: "",
+    vqgan_name: "vqgan_imagenet_f16_16384",
+    width: 1000,
+    height: 1000,
   }
 
   togglePrompt(index: number, changed: React.ChangeEvent<HTMLInputElement>) {
@@ -115,7 +198,13 @@ class PromptForm extends Component<{}, ParamState> {
     const prompts = this.state.prompts;
     const prompt = prompts[index];
     if(prompt){
-      prompt.value = event.target.value;
+      let input = event.target.value;
+      if(input.length == 0){
+        prompt.enabled = false;
+      }else if (!prompt.enabled && prompt.value.length == 0 && input.length > 0){
+        prompt.enabled = true;
+      }
+      prompt.value = input;
     }
     this.setState({...this.state, prompts: prompts});
   }
@@ -124,7 +213,7 @@ class PromptForm extends Component<{}, ParamState> {
     const prompt = prompts[index];
     if(!prompt) return;
     if(index === prompts.length - 1){
-      prompts.push({enabled: true, value: ""});
+      prompts.push({enabled: false, value: ""});
     } else {
       prompts.splice(index, 1);
     }
@@ -133,81 +222,100 @@ class PromptForm extends Component<{}, ParamState> {
 
 
   render() {
+
     return <Form>
       {this.state.prompts.map((st,idx) => 
-        <PromptText key={idx} showCheckbox={idx > 0} 
+        <PromptText key={idx}
+          showCheckbox={true} 
           showButton={true} 
           isAdd={idx === this.state.prompts.length - 1}
-          state={st} 
+          state={st}
+          disabled={this.props.running}
           onCheckChange={this.togglePrompt.bind(this,idx)}
           onFormChange={this.updatePrompt.bind(this,idx)}
           onButtonClick={this.addsubPrompt.bind(this,idx)}
         />
       )}
-      <Form.Control type="button" className="main-btn" hidden value="Submit"></Form.Control>
+      <Form.Group >
+        <Form.Label>CUT NUMBER</Form.Label>
+        <Form.Control type="range" defaultValue="0"
+        disabled={this.props.running}
+        onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {evt.preventDefault(); this.setState({...this.state, cutn: Number.parseInt(evt.target.value)})}}/>
+        <Form.Label>{this.state.cutn}</Form.Label>
+      </Form.Group>
+      <Form.Group>
+        <Form.Label>CUT POWER</Form.Label>
+        <Form.Control type="range" defaultValue="0"
+        disabled={this.props.running} 
+        onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {evt.preventDefault(); this.setState({...this.state, cut_pow: Number.parseFloat(evt.target.value)})}}/>
+        <Form.Label>{this.state.cut_pow}</Form.Label>
+      </Form.Group>
+      <Form.Group>
+        <Form.Label>MSE WEIGHT</Form.Label>
+        <Form.Control type="range" defaultValue="0"
+        disabled={this.props.running} 
+        onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {evt.preventDefault(); this.setState({...this.state, mse_weight: Number.parseFloat(evt.target.value)})}}/>
+        <Form.Label>{this.state.mse_weight}</Form.Label>
+      </Form.Group>
+      <Form.Group>
+        <Form.Label>MSE DECAY</Form.Label>
+        <Form.Control type="range" defaultValue="0"
+        disabled={this.props.running} 
+        onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {evt.preventDefault(); this.setState({...this.state, mse_decay: Number.parseFloat(evt.target.value)})}}/>
+        <Form.Label>{this.state.mse_decay}</Form.Label>
+      </Form.Group>
+      <Form.Group>
+        <Form.Label>MSE DECAY EVERY</Form.Label>
+        <Form.Control type="range" defaultValue="0"
+        disabled={this.props.running} 
+        onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {evt.preventDefault(); this.setState({...this.state, mse_decay_every: Number.parseFloat(evt.target.value)})}}/>
+        <Form.Label>{this.state.mse_decay_every}</Form.Label>
+      </Form.Group>
+      <Form.Group>
+        <Form.Label>STEP SIZE</Form.Label>
+        <Form.Control type="range" defaultValue="0"
+        disabled={this.props.running} 
+        onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {evt.preventDefault(); this.setState({...this.state, step_size: Number.parseFloat(evt.target.value)})}}/>
+        <Form.Label>{this.state.step_size}</Form.Label>
+      </Form.Group>
+      <Form.Group>
+        <Form.Label>NOISE FACTOR</Form.Label>
+        <Form.Control type="range" defaultValue="0"
+        disabled={this.props.running} 
+        onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {evt.preventDefault(); this.setState({...this.state, noise_fac: Number.parseFloat(evt.target.value)})}}/>
+        <Form.Label>{this.state.noise_fac}</Form.Label>
+      </Form.Group>
+      <Form.Group>
+        <Form.Label>RESOLUTION</Form.Label>
+        <InputGroup>
+          <Form.Control type="number"
+          value={this.state.width}
+          disabled={this.props.running} 
+          onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
+            evt.preventDefault();
+            this.setState({...this.state, width: Number.parseInt(evt.target.value)});
+          }}/>
+          <InputGroup.Text>x</InputGroup.Text>
+          <Form.Control type="number"
+          value={this.state.height}
+          disabled={this.props.running} 
+          onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
+            evt.preventDefault();
+            this.setState({...this.state, height: Number.parseInt(evt.target.value)});
+          }}/>
+        </InputGroup>
+      </Form.Group>
+      <Form.Control type="button" className="main-btn" value="Submit" 
+      hidden={!this.state.prompts.some((s)=> s.value.length > 0 && s.enabled)} 
+      disabled={this.props.running} 
+      onClick={(evt: React.MouseEvent<HTMLInputElement,MouseEvent>) => {
+        evt.preventDefault();
+        this.props.onSubmit(this.state);
+      }}></Form.Control>
     </Form>
   }
 
 }
-
-// `use strict`;
-// $(() => {
-
-//     const ws_endpoint = "ws://api.doodlebot.ai/api/run";
-//     var global_ws: WebSocket | null = null;
-
-//     $("#prompt").submit(async (evt) => {
-//         evt.preventDefault();
-//         $("#prompt button").attr("disabled","");
-//         try {
-//             global_ws = new WebSocket(ws_endpoint);
-//             console.log("Websiocket connected");
-//         } catch(err) {
-//             global_ws = null;
-//             console.error("Websocket connection failed");
-//             console.error(err);
-//             return;
-//         }
-//         var prompt = $("#prompt input").val();
-
-//         var obj = { prompts: [prompt+" by james gurney"] };
-//         var msg = msgpack.serialize(obj);
-//         global_ws.addEventListener("open", () => {
-//             global_ws?.send(msg);
-//             console.log("Sent: ",obj,msg);
-//             $("#stop_btn").fadeIn("fast");
-//         });
-
-
-//         const imgs = $("#output img").toArray() as HTMLImageElement[];
-//         let [cur, last] = [0, imgs.length - 1];
-
-
-//         global_ws.addEventListener('message', function (event) {
-//           var png_bytes = event.data;
-//           png_bytes.type = "image/png";
-//           console.log(`Recv'd: ${png_bytes.size} bytes`);
-        
-//           //$(imgs[last]).hide();
-//           var img = imgs[cur];
-//           // TODO: whatever
-//           img.src = URL.createObjectURL(png_bytes);
-//           //$(imgs[cur]).show();
-//           [last, cur] = [cur, (cur + 1) % imgs.length];
-//         });
-//       });
-
-//     $("#stop_btn").click((evt) => {
-//         if(global_ws != null){
-//             global_ws.close();
-//             global_ws = null;
-//             $(evt.target).attr("disabled", "");
-//             console.log("Websocket closed");
-//         } else {
-//             console.error("Could not close websocket");
-//         }
-//     });
-// });
 
 let pc = document.getElementById("prompt_app");
 let p = <PromptApp></PromptApp>
