@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const webpack = require('webpack');
-const css_extract = require('mini-css-extract-plugin');
+const CSSExtract = require('mini-css-extract-plugin');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
@@ -18,11 +18,8 @@ module.exports = {
             writeToDisk: true,
         }
     },
-    entry: {
-        main: "./src/ts/main.tsx",
-        app: "./src/ts/app.tsx",
-    },
-    devtool: 'inline-source-map',
+    entry: ['./src/ts'],
+    devtool: 'source-map',
     output: {
         path: path.resolve(__dirname, 'dist'),
         publicPath: process.env.ASSET_PATH || './',
@@ -31,22 +28,12 @@ module.exports = {
         extensions: [".ts",".tsx",".js",".jsx"]
     },
     module: {
-        rules: [{
+        rules: [
+            {
                 test: /\.(ts|js)x?$/,
                 exclude: /node_modules/,
 
-                use: [
-                    {
-                    loader: "babel-loader",
-                    options: {
-                        cacheDirectory: true,
-                        presets: ['@babel/preset-env','@babel/preset-react','@babel/preset-typescript'],
-                        plugins: ["@babel/plugin-transform-typescript",
-                        "@babel/plugin-transform-runtime",
-                        "@babel/proposal-object-rest-spread"],
-                    }
-
-                }]
+                use: "babel-loader",
             },
             {
                 test: /\.html$/,
@@ -60,12 +47,30 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                use:[css_extract.loader,'css-loader']
-            }
+                use: [CSSExtract.loader, 'css-loader'],
+            },
+            {
+                test: /\.scss$/,
+                use: [CSSExtract.loader, 'css-loader', 'sass-loader'],
+            },
         ]
     },
+    optimization: {
+        splitChunks: {
+            chunks: 'all',
+        }
+    },
     plugins: [
-        new css_extract(),
+        new CSSExtract({
+            filename: "[name].css",
+            chunkFilename: "[id].css"
+        }),
+        new webpack.ProvidePlugin({
+            $: "jquery",
+            jQuery: "jquery",
+            "window.jQuery": "jquery",
+            Popper: ['popper.js', 'default']
+        }),
         new HTMLWebpackPlugin({
             filename: path.resolve("dist","index.html"),
             template: path.resolve('src/html/index.html'),

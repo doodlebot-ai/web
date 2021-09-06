@@ -2,7 +2,7 @@ import msgpack from "@ygoe/msgpack";
 
 import React, { Component, useState, useEffect } from "react";
 import ReactDOM from "react-dom";
-import {Row, Col, Container, Button, Form, InputGroup, SplitButton, ToggleButton, FormText, FormControl} from "react-bootstrap";
+import { Row, Col, Container, Button, Form, InputGroup, SplitButton, ToggleButton, FormText, FormControl} from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faPlus, faMinus} from "@fortawesome/free-solid-svg-icons";
 import { ThemeConsumer } from "react-bootstrap/esm/ThemeProvider";

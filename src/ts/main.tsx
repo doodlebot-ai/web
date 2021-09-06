@@ -2,8 +2,9 @@ import WOW from "wow.js";
 import $ from "jquery";
 import "particles.js";
 
+import 'bootstrap';
+import "bootstrap/scss/bootstrap.scss";
 import db_logo from "../../assets/images/doodlebot.png";
-import "bootstrap/dist/css/bootstrap.css";
 import "../../assets/css/animate.css";
 import "../../assets/css/LineIcons.2.0.css";
 import "../../assets/css/style.css";
