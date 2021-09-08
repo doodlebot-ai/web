@@ -37,8 +37,9 @@ const PromptApp: React.FC<{}> = () => {
     }
 
     ws.onmessage = msg => {
-      let png_bytes = msg.data as Blob;
-      let src = URL.createObjectURL(png_bytes.slice(undefined, undefined, "image/png"));
+      let data_bytes = msg.data as Blob;
+      let png_bytes = data_bytes.slice(0,data_bytes.size, "image/png");
+      let src = URL.createObjectURL(png_bytes);
       if (image_src.length > 0) {
         URL.revokeObjectURL(image_src);
       }
