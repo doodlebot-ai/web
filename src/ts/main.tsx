@@ -82,6 +82,9 @@ $(function () {
     //===== Login 
     $.ajaxSetup({
         crossDomain: true,
+        xhrFields: {
+            withCredentials: true,
+        }
     });
     $("#loginform")?.on('submit', evt => {
         evt.preventDefault();
