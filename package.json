@@ -5,7 +5,7 @@
   "main": "./static/index.html",
   "scripts": {
     "build": "webpack",
-    "serve": "webpack serve",
+    "serve": "webpack serve --mode development",
     "predeploy": "rm -r dist; webpack --mode production",
     "deploy": "gh-pages -d dist"
   },

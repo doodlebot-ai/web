@@ -79,7 +79,58 @@ $(function () {
     //     time: 3000
     // });
 
+    //===== Login 
+    $.ajaxSetup({
+        crossDomain: true,
+    });
+    $("#loginform")?.on('submit', evt => {
+        evt.preventDefault();
+        $.ajax({
+          url:"https://api.doodlebot.ai/api/auth/login",
+          method: "POST",
+          data: $("#loginform").serialize()
+        }).done(resp => {
+          console.log(resp);
+          window.location.replace("/app");
+        }).fail(resp => {
+          $("#err_popup").show();
+          if(resp.responseJSON?.msg){
+              $("#err_msg").text(resp.responseJSON.msg);
+          }
+          console.error(resp);
+        })
+    });
 
+    //===== Register
+    $("#registerform")?.on('submit', evt => {
+        evt.preventDefault();
+        $.ajax({
+          url:"https://api.doodlebot.ai/api/auth/register",
+          method: "POST",
+          data: $("#registerform").serialize()
+        }).done(resp => {
+          console.log(resp);
+          window.location.replace("/login");
+        }).fail(resp => {
+          $("#err_popup").show();
+          console.error(resp);
+        })
+    });
+
+    //===== Demo register
+    $("#demo_register")?.on('submit', evt => {
+        evt.preventDefault();
+        $.ajax({
+          url:"https://api.doodlebot.ai/api/signup",
+          method: "POST",
+          data: $("#demo_register").serialize()
+        }).done(resp => {
+          console.log(resp);
+          window.location.replace("/demo2");
+        }).fail(resp => {
+          console.error(resp);
+        })
+    });
 
     //===== Back to top
 

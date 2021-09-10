@@ -322,6 +322,4 @@ let pc = document.getElementById("prompt_app");
 let p = <PromptApp></PromptApp>
 if (pc) {
   ReactDOM.render(p, pc);
-} else {
-  console.error("Could not find container to bind app");
 }

@@ -96,11 +96,9 @@
             <div class="row" style="margin-top:30px;">
               <iframe name="dummyframe" id="dummyframe" style="display: none;"></iframe>
 
-              <form action="https://api.doodlebot.ai/api/auth/register" target="dummyframe" method="post">
+              <form id="registerform" target="dummyframe">
 
                 <div class="container">
-                  <!-- <label for="username"><b>Username</b></label> -->
-                  <input type="username" placeholder="Enter Username" name="username" required>
 
                   <!-- <label for="email"><b>Email</b></label> -->
                   <input type="email" placeholder="Enter Email" name="email" required>
@@ -111,6 +109,10 @@
                   <button class="form-submit-btn" type="submit">Register</button>
                 </div>
               </form>
+              <div id="err_popup" class="alert alert-danger alert-dismissible fade show" style="display:none">
+                <strong>Error!</strong> <span id="err_msg">Failed to register</span>
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+              </div>
               <div class="container">
               </div>
             </div> <!-- row -->
