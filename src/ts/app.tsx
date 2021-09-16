@@ -2,10 +2,10 @@ import msgpack from "@ygoe/msgpack";
 
 import React, { Component, useState, useEffect } from "react";
 import ReactDOM from "react-dom";
-import { Row, Col, Container, Button, Form, InputGroup, SplitButton, ToggleButton, FormText, FormControl } from "react-bootstrap";
+import { Row, Col, Container, Button, Form, InputGroup, SplitButton, ToggleButton, FormText, FormControl, Spinner } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
-import { ThemeConsumer } from "react-bootstrap/esm/ThemeProvider";
+import CanvasDraw from 'react-canvas-draw';
 
 interface PromptMsg {
   prompts: string[];
@@ -18,6 +18,7 @@ interface PromptMsg {
   noise_fac?: number;
   clip_name?: string;
   vqgan_name?: string;
+  start_img?: Uint8Array;
   width?: number;
   height?: number;
 }
@@ -29,6 +30,8 @@ const PromptApp: React.FC<{}> = () => {
   const [running, setRunning] = useState<boolean>(false);
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [image_src, setSrc] = useState<string>("");
+  const [brush, setBrush] = useState<{size: number, color: string}>({size: 10, color: "#000000"});
+
 
   useEffect(() => {
     if (ws == null) {
@@ -60,6 +63,8 @@ const PromptApp: React.FC<{}> = () => {
     }
   }, [ws]);
 
+  let pref: PromptForm | undefined;
+  let cnv: any | undefined;
 
   return <Container>
     <Row className="justify-content-center">
@@ -74,10 +79,33 @@ const PromptApp: React.FC<{}> = () => {
             </div>
           </Col>
           <Col lg="6">
-            <PromptForm running={running} onSubmit={(evt: ParamState) => {
+            <PromptForm ref={r => {pref = (r == null ? undefined : r)}} running={running} onSubmit={(evt: ParamState) => {
               let ws = new WebSocket(API_ENDPOINT);
               setWs(ws);
               setRunning(true);
+              if(cnv?.canvas.drawing){
+                let cv : HTMLCanvasElement = cnv?.canvas.drawing as HTMLCanvasElement;
+                cv.toBlob(blob => {
+                  if(blob == null){
+                    console.error("Error converting input image to raw blob data");
+                    return;
+                  }
+                  blob.arrayBuffer().then(buf => {
+                    
+                    const msg: PromptMsg = {
+                      width: evt.width,
+                      height: evt.height,
+                      prompts: evt.prompts.filter((e) => e.enabled).map((a) => a.value),
+                      start_img: new Uint8Array(buf),
+                    };
+                    ws.onopen = evt => {
+                      const bin = msgpack.serialize(msg);
+                      ws?.send(bin);
+                    };
+                  });
+                }, "image/png");
+                return;
+              }
               const msg: PromptMsg = {
                 width: evt.width,
                 height: evt.height,
@@ -92,8 +120,28 @@ const PromptApp: React.FC<{}> = () => {
         </Row>
       </Col>
     </Row>
+    <Row>
+      <div>
+      <Form.Control type="color" defaultValue="#000000" onChange={e => setBrush({...brush, color: e.target.value})}/>
+      <Form.Control type="number" defaultValue={10} onChange={e => {
+        let n = Number.parseInt(e.target.value);
+        if(n) setBrush({...brush, size: n})
+        }}/>
+      </div>
+      <CanvasDraw ref={r => {
+        cnv = (r == null ? undefined : r)
+      }} canvasWidth={pref?.state.width || 1000} canvasHeight={pref?.state.height || 1000} brushRadius={brush.size} brushColor={brush.color}>
+      </CanvasDraw>
+    </Row>
     <Row className="justify-content-center">
-      {ws != null && <div id="output">{ws?.readyState == WebSocket.OPEN ? <img src={image_src} /> : "Loading..."}</div>}
+      <div hidden={ws == null}>
+        <Button disabled={!(ws?.readyState == WebSocket.OPEN)} size="lg" onClick={() => {
+          if(ws?.readyState == WebSocket.OPEN){
+            ws?.close();
+          }
+        }}>{ws?.readyState == WebSocket.OPEN ? "Stop" : <span><Spinner animation="border" role="status"/> ...Loading</span> }</Button>
+        <img hidden={image_src.length == 0} src={image_src}></img>
+      </div>
     </Row>
   </Container>;
 }
