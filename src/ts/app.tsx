@@ -2,7 +2,8 @@ import msgpack from "@ygoe/msgpack";
 
 import React, { Component, useState, useEffect } from "react";
 import ReactDOM from "react-dom";
-import { Row, Col, Container, Button, Form, InputGroup, SplitButton, ToggleButton, FormText, FormControl, Spinner } from "react-bootstrap";
+import { Row, Col, Container, Button, InputGroup, SplitButton, ToggleButton, FormText, FormControl, Spinner } from "react-bootstrap";
+import Form from 'react-bootstrap/Form'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
 import CanvasDraw from 'react-canvas-draw';
@@ -96,6 +97,15 @@ const PromptApp: React.FC<{}> = () => {
                       width: evt.width,
                       height: evt.height,
                       prompts: evt.prompts.filter((e) => e.enabled).map((a) => a.value),
+                      cutn: evt.cutn,
+                      cut_pow: evt.cut_pow,
+                      mse_weight: evt.mse_weight,
+                      mse_decay: evt.mse_decay,
+                      mse_decay_every: evt.mse_decay_every,
+                      step_size: evt.step_size,
+                      noise_fac: evt.noise_fac,
+                      clip_name: evt.clip_name,
+                      vqgan_name: evt.vqgan_name,
                       start_img: new Uint8Array(buf),
                     };
                     ws.onopen = evt => {
@@ -110,6 +120,15 @@ const PromptApp: React.FC<{}> = () => {
                 width: evt.width,
                 height: evt.height,
                 prompts: evt.prompts.filter((e) => e.enabled).map((a) => a.value),
+                cutn: evt.cutn,
+                cut_pow: evt.cut_pow,
+                mse_weight: evt.mse_weight,
+                mse_decay: evt.mse_decay,
+                mse_decay_every: evt.mse_decay_every,
+                step_size: evt.step_size,
+                noise_fac: evt.noise_fac,
+                clip_name: evt.clip_name,
+                vqgan_name: evt.vqgan_name
               };
               ws.onopen = evt => {
                 const bin = msgpack.serialize(msg);
@@ -197,14 +216,14 @@ class PromptText extends Component<PromptTextProps, {}> {
 
 interface ParamState {
   prompts: PromptTextState[];
-  cutn: number;
-  cut_pow: number;
-  mse_weight: number;
-  mse_decay: number;
-  mse_decay_every: number;
-  step_size: number;
-  noise_fac: number;
-  clip_name: string;
+  cutn?: number;
+  cut_pow?: number;
+  mse_weight?: number;
+  mse_decay?: number;
+  mse_decay_every?: number;
+  step_size?: number;
+  noise_fac?: number;
+  clip_name?: string;
   vqgan_name: string;
   width: number;
   height: number;
@@ -220,14 +239,6 @@ class PromptForm extends Component<PromptFormProps, ParamState> {
     prompts: [
       { enabled: false, value: "" }
     ],
-    cutn: 0,
-    cut_pow: 0,
-    mse_weight: 0,
-    mse_decay: 0,
-    mse_decay_every: 0,
-    step_size: 0,
-    noise_fac: 0,
-    clip_name: "",
     vqgan_name: "vqgan_imagenet_f16_16384",
     width: 1000,
     height: 1000,
@@ -287,52 +298,45 @@ class PromptForm extends Component<PromptFormProps, ParamState> {
       )}
       <Form.Group >
         <Form.Label>CUT NUMBER</Form.Label>
-        <Form.Control type="range" defaultValue="0"
+        <Form.Control type="number" defaultValue="0"
           disabled={this.props.running}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => { evt.preventDefault(); this.setState({ ...this.state, cutn: Number.parseInt(evt.target.value) }) }} />
-        <Form.Label>{this.state.cutn}</Form.Label>
       </Form.Group>
       <Form.Group>
         <Form.Label>CUT POWER</Form.Label>
-        <Form.Control type="range" defaultValue="0"
+        <Form.Control type="number" defaultValue="0"
           disabled={this.props.running}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => { evt.preventDefault(); this.setState({ ...this.state, cut_pow: Number.parseFloat(evt.target.value) }) }} />
-        <Form.Label>{this.state.cut_pow}</Form.Label>
       </Form.Group>
       <Form.Group>
         <Form.Label>MSE WEIGHT</Form.Label>
-        <Form.Control type="range" defaultValue="0"
+        <Form.Control type="number" defaultValue="0"
           disabled={this.props.running}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => { evt.preventDefault(); this.setState({ ...this.state, mse_weight: Number.parseFloat(evt.target.value) }) }} />
-        <Form.Label>{this.state.mse_weight}</Form.Label>
       </Form.Group>
       <Form.Group>
         <Form.Label>MSE DECAY</Form.Label>
-        <Form.Control type="range" defaultValue="0"
+        <Form.Control type="number" defaultValue="0"
           disabled={this.props.running}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => { evt.preventDefault(); this.setState({ ...this.state, mse_decay: Number.parseFloat(evt.target.value) }) }} />
-        <Form.Label>{this.state.mse_decay}</Form.Label>
       </Form.Group>
       <Form.Group>
         <Form.Label>MSE DECAY EVERY</Form.Label>
-        <Form.Control type="range" defaultValue="0"
+        <Form.Control type="number" defaultValue="0"
           disabled={this.props.running}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => { evt.preventDefault(); this.setState({ ...this.state, mse_decay_every: Number.parseFloat(evt.target.value) }) }} />
-        <Form.Label>{this.state.mse_decay_every}</Form.Label>
       </Form.Group>
       <Form.Group>
         <Form.Label>STEP SIZE</Form.Label>
-        <Form.Control type="range" defaultValue="0"
+        <Form.Control type="number" defaultValue="0"
           disabled={this.props.running}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => { evt.preventDefault(); this.setState({ ...this.state, step_size: Number.parseFloat(evt.target.value) }) }} />
-        <Form.Label>{this.state.step_size}</Form.Label>
       </Form.Group>
       <Form.Group>
         <Form.Label>NOISE FACTOR</Form.Label>
-        <Form.Control type="range" defaultValue="0"
+        <Form.Control type="number" defaultValue="0"
           disabled={this.props.running}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => { evt.preventDefault(); this.setState({ ...this.state, noise_fac: Number.parseFloat(evt.target.value) }) }} />
-        <Form.Label>{this.state.noise_fac}</Form.Label>
       </Form.Group>
       <Form.Group>
         <Form.Label>RESOLUTION</Form.Label>
@@ -353,6 +357,16 @@ class PromptForm extends Component<PromptFormProps, ParamState> {
               this.setState({ ...this.state, height: Number.parseInt(evt.target.value) });
             }} />
         </InputGroup>
+      </Form.Group>
+      <Form.Group>
+        <Form.Label>VQGAN Mode</Form.Label>
+        <Form.Control as="select" custom defaultValue="vqgan_imagenet_f16_16384" onChange={evt => {
+          this.setState({...this.state, vqgan_name: evt.target.value})
+        }}>
+          <option value="vqgan_imagenet_f16_16384">Imagenet</option>
+          <option value="vqgan_wikiart_f16_16384">WikiArt</option>
+          <option value="vqgan_gumbel_f8_8192">Gumbel</option>
+        </Form.Control>
       </Form.Group>
       <Form.Control type="button" className="main-btn" value="Submit"
         hidden={!this.state.prompts.some((s) => s.value.length > 0 && s.enabled)}
