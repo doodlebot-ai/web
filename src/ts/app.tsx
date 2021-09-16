@@ -153,7 +153,7 @@ const PromptApp: React.FC<{}> = () => {
       </CanvasDraw>
     </Row>
     <Row className="justify-content-center">
-      <div hidden={ws == null}>
+      <div hidden={ws == null && image_src.length == 0}>
         <Button disabled={!(ws?.readyState == WebSocket.OPEN)} size="lg" onClick={() => {
           if(ws?.readyState == WebSocket.OPEN){
             ws?.close();
