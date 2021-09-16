@@ -157,6 +157,8 @@ const PromptApp: React.FC<{}> = () => {
         <Button disabled={!(ws?.readyState == WebSocket.OPEN)} size="lg" onClick={() => {
           if(ws?.readyState == WebSocket.OPEN){
             ws?.close();
+            setWs(null);
+            setRunning(false);
           }
         }}>{ws?.readyState == WebSocket.OPEN ? "Stop" : <span><Spinner animation="border" role="status"/> ...Loading</span> }</Button>
         <img hidden={image_src.length == 0} src={image_src}></img>
