@@ -242,8 +242,11 @@ class PromptForm extends Component<PromptFormProps, ParamState> {
       { enabled: false, value: "" }
     ],
     vqgan_name: "vqgan_imagenet_f16_16384",
-    width: 1000,
-    height: 1000,
+    cutn: 32,
+    mse_weight: 0.1,
+    step_size: 0.25,
+    width: 512,
+    height: 512,
   }
 
   togglePrompt(index: number, changed: React.ChangeEvent<HTMLInputElement>) {
@@ -300,45 +303,21 @@ class PromptForm extends Component<PromptFormProps, ParamState> {
       )}
       <Form.Group >
         <Form.Label>CUT NUMBER</Form.Label>
-        <Form.Control type="number" defaultValue="0"
+        <Form.Control type="number" defaultValue={32}
           disabled={this.props.running}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => { evt.preventDefault(); this.setState({ ...this.state, cutn: Number.parseInt(evt.target.value) }) }} />
       </Form.Group>
       <Form.Group>
-        <Form.Label>CUT POWER</Form.Label>
-        <Form.Control type="number" defaultValue="0"
-          disabled={this.props.running}
-          onChange={(evt: React.ChangeEvent<HTMLInputElement>) => { evt.preventDefault(); this.setState({ ...this.state, cut_pow: Number.parseFloat(evt.target.value) }) }} />
-      </Form.Group>
-      <Form.Group>
         <Form.Label>MSE WEIGHT</Form.Label>
-        <Form.Control type="number" defaultValue="0"
+        <Form.Control type="number" defaultValue={0.1}
           disabled={this.props.running}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => { evt.preventDefault(); this.setState({ ...this.state, mse_weight: Number.parseFloat(evt.target.value) }) }} />
       </Form.Group>
       <Form.Group>
-        <Form.Label>MSE DECAY</Form.Label>
-        <Form.Control type="number" defaultValue="0"
-          disabled={this.props.running}
-          onChange={(evt: React.ChangeEvent<HTMLInputElement>) => { evt.preventDefault(); this.setState({ ...this.state, mse_decay: Number.parseFloat(evt.target.value) }) }} />
-      </Form.Group>
-      <Form.Group>
-        <Form.Label>MSE DECAY EVERY</Form.Label>
-        <Form.Control type="number" defaultValue="0"
-          disabled={this.props.running}
-          onChange={(evt: React.ChangeEvent<HTMLInputElement>) => { evt.preventDefault(); this.setState({ ...this.state, mse_decay_every: Number.parseFloat(evt.target.value) }) }} />
-      </Form.Group>
-      <Form.Group>
         <Form.Label>STEP SIZE</Form.Label>
-        <Form.Control type="number" defaultValue="0"
+        <Form.Control type="number" defaultValue={0.25}
           disabled={this.props.running}
           onChange={(evt: React.ChangeEvent<HTMLInputElement>) => { evt.preventDefault(); this.setState({ ...this.state, step_size: Number.parseFloat(evt.target.value) }) }} />
-      </Form.Group>
-      <Form.Group>
-        <Form.Label>NOISE FACTOR</Form.Label>
-        <Form.Control type="number" defaultValue="0"
-          disabled={this.props.running}
-          onChange={(evt: React.ChangeEvent<HTMLInputElement>) => { evt.preventDefault(); this.setState({ ...this.state, noise_fac: Number.parseFloat(evt.target.value) }) }} />
       </Form.Group>
       <Form.Group>
         <Form.Label>RESOLUTION</Form.Label>
