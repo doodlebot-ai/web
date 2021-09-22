@@ -4,11 +4,30 @@ import "particles.js";
 
 import 'bootstrap';
 import "bootstrap/scss/bootstrap.scss";
+import firebase from 'firebase/app';
 import db_logo from "../../assets/images/doodlebot.png";
 import "../../assets/css/animate.css";
 import "../../assets/css/LineIcons.2.0.css";
 import "../../assets/css/default.css";
 import "../../assets/css/style.css";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+
+export const Firebase = firebase.initializeApp({
+
+    apiKey: "AIzaSyDGiqR5mqW-yetNwKl7fqBHNJsO_t4AbAg",
+
+    authDomain: "doodlebot-dev.firebaseapp.com",
+
+    projectId: "doodlebot-dev",
+
+    storageBucket: "doodlebot-dev.appspot.com",
+
+    messagingSenderId: "1301763594",
+
+    appId: "1:1301763594:web:8541c6d4edddb152d1f1f3"
+
+  });
+export const Auth = getAuth(Firebase);
 
 
 $(function () {
@@ -88,51 +107,54 @@ $(function () {
     });
     $("#loginform")?.on('submit', evt => {
         evt.preventDefault();
-        $.ajax({
-          url:"https://api.doodlebot.ai/api/auth/login",
-          method: "POST",
-          data: $("#loginform").serialize()
-        }).done(resp => {
-          console.log(resp);
-          window.location.replace("/app");
-        }).fail(resp => {
-          $("#err_popup").show();
-          if(resp.responseJSON?.msg){
-              $("#err_msg").text(resp.responseJSON.msg);
-          }
-          console.error(resp);
+        const form = evt.currentTarget as HTMLFormElement;
+        const email = (form.elements.namedItem("email") as HTMLInputElement | null)?.value;
+        const pass = (form.elements.namedItem("password") as HTMLInputElement | null)?.value;
+        if(!(email && pass)){
+            $("#err_popup").show();
+            $("#err_msg").text("Both email and password required");
+            return;
+        }
+        signInWithEmailAndPassword(Auth, email, pass).then(() => 
+            window.location.replace("/app")
+        ).catch((e) => {
+            $("#err_popup").show();
+            $("#err_msg").text(e.message);
         })
     });
 
     //===== Register
     $("#registerform")?.on('submit', evt => {
         evt.preventDefault();
-        $.ajax({
-          url:"https://api.doodlebot.ai/api/auth/register",
-          method: "POST",
-          data: $("#registerform").serialize()
-        }).done(resp => {
-          console.log(resp);
-          window.location.replace("/login");
-        }).fail(resp => {
-          $("#err_popup").show();
-          console.error(resp);
+        const form = evt.currentTarget as HTMLFormElement;
+        const email = (form.elements.namedItem("email") as HTMLInputElement | null)?.value;
+        const pass = (form.elements.namedItem("password") as HTMLInputElement | null)?.value;
+        if(!(email && pass)){
+            $("#err_popup").show();
+            $("#err_msg").text("Both email and password required");
+            return;
+        }
+        createUserWithEmailAndPassword(Auth, email, pass).then(() => 
+            window.location.replace("/login")
+        ).catch((e) => {
+            $("#err_popup").show();
+            $("#err_msg").text(e.message);
         })
     });
 
     //===== Demo register
     $("#demo_register")?.on('submit', evt => {
         evt.preventDefault();
-        $.ajax({
-          url:"https://api.doodlebot.ai/api/signup",
-          method: "POST",
-          data: $("#demo_register").serialize()
-        }).done(resp => {
-          console.log(resp);
-          window.location.replace("/demo2");
-        }).fail(resp => {
-          console.error(resp);
-        })
+        // $.ajax({
+        //   url:"https://api.doodlebot.ai/api/signup",
+        //   method: "POST",
+        //   data: $("#demo_register").serialize()
+        // }).done(resp => {
+        //   console.log(resp);
+        //   window.location.replace("/demo2");
+        // }).fail(resp => {
+        //   console.error(resp);
+        // })
     });
 
     //===== Back to top
@@ -395,3 +417,4 @@ $(function () {
 
 
 });
+
