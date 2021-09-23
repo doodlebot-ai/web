@@ -4,7 +4,7 @@ import "particles.js";
 
 import 'bootstrap';
 import "bootstrap/scss/bootstrap.scss";
-import firebase from 'firebase/app';
+import { initializeApp } from 'firebase/app';
 import db_logo from "../../assets/images/doodlebot.png";
 import "../../assets/css/animate.css";
 import "../../assets/css/LineIcons.2.0.css";
@@ -12,20 +12,13 @@ import "../../assets/css/default.css";
 import "../../assets/css/style.css";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 
-export const Firebase = firebase.initializeApp({
-
+export const Firebase = initializeApp({
     apiKey: "AIzaSyDGiqR5mqW-yetNwKl7fqBHNJsO_t4AbAg",
-
     authDomain: "doodlebot-dev.firebaseapp.com",
-
     projectId: "doodlebot-dev",
-
     storageBucket: "doodlebot-dev.appspot.com",
-
     messagingSenderId: "1301763594",
-
     appId: "1:1301763594:web:8541c6d4edddb152d1f1f3"
-
   });
 export const Auth = getAuth(Firebase);
 
