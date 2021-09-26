@@ -7,8 +7,8 @@ import Form from 'react-bootstrap/Form'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
 import CanvasDraw from 'react-canvas-draw';
-import { getAuth } from 'firebase/auth';
-import { Firebase } from './main';
+import { getAuth, User } from 'firebase/auth';
+import { Firebase, Auth } from './main';
 
 interface PromptMsg {
   prompts: string[];
@@ -49,13 +49,17 @@ const PromptApp: React.FC<{}> = () => {
   let pref: PromptForm | undefined;
   let cnv: any | undefined;
 
-  const user = getAuth(Firebase).currentUser;
+  let user : User | null  = null;
 
-  if(user == null){
-    console.error("Must be logged in");
-    console.log(user);
-    //window.location.replace('/login');
-  }
+  Auth.onAuthStateChanged( ruser => {
+    if(ruser) {
+      user = ruser;
+    }else{
+      console.error("User not signed in, redirecting to login");
+      window.location.replace("/login");
+    }
+  })
+
 
   return <Container>
     <Row className="justify-content-center">
@@ -71,6 +75,9 @@ const PromptApp: React.FC<{}> = () => {
           </Col>
           <Col lg="6">
             <PromptForm ref={r => {pref = (r == null ? undefined : r)}} running={running} onSubmit={(evt: ParamState) => {
+              if(!user){
+                console.error("Must be logged in, must be some state error?");
+              }
               user?.getIdToken().then((token) => {
                 let api = new URL(API_ENDPOINT);
                 api.searchParams.set("token", token);
