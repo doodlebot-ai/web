@@ -7,7 +7,8 @@ import Form from 'react-bootstrap/Form'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
 import CanvasDraw from 'react-canvas-draw';
-import { Auth, Firebase } from './main';
+import { Firebase } from './main';
+import { getAuth } from 'firebase/auth';
 
 interface PromptMsg {
   prompts: string[];
@@ -48,7 +49,7 @@ const PromptApp: React.FC<{}> = () => {
   let pref: PromptForm | undefined;
   let cnv: any | undefined;
 
-  const user = Auth.currentUser;
+  const user = getAuth(Firebase).currentUser;
 
   if(user == null){
     console.error("Must be logged in");
