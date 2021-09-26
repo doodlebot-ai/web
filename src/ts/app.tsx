@@ -8,7 +8,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
 import CanvasDraw from 'react-canvas-draw';
 import { Firebase, Auth } from './main';
-import { getAuth } from 'firebase/auth';
 
 interface PromptMsg {
   prompts: string[];
