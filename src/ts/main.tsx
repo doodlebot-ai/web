@@ -103,16 +103,23 @@ $(function () {
         const form = evt.currentTarget as HTMLFormElement;
         const email = (form.elements.namedItem("email") as HTMLInputElement | null)?.value;
         const pass = (form.elements.namedItem("password") as HTMLInputElement | null)?.value;
-        if(!(email && pass)){
+        const showErr = (msg: string) => {
             $("#err_popup").show();
-            $("#err_msg").text("Both email and password required");
+            $("#err_msg").text(msg);
+        };
+
+        if(!email){
+            showErr("Email Required");
+            return;
+        }else if(!pass){
+            showErr("Passwornd Required");
             return;
         }
+
         signInWithEmailAndPassword(Auth, email, pass).then(() => 
             window.location.replace("/app")
         ).catch((e) => {
-            $("#err_popup").show();
-            $("#err_msg").text(e.message);
+            showErr(e.message);
         })
     });
 
@@ -122,16 +129,22 @@ $(function () {
         const form = evt.currentTarget as HTMLFormElement;
         const email = (form.elements.namedItem("email") as HTMLInputElement | null)?.value;
         const pass = (form.elements.namedItem("password") as HTMLInputElement | null)?.value;
-        if(!(email && pass)){
+        const showErr = (msg: string) => {
             $("#err_popup").show();
-            $("#err_msg").text("Both email and password required");
+            $("#err_msg").text(msg);
+        };
+
+        if(!email){
+            showErr("Email Required");
+            return;
+        }else if(!pass){
+            showErr("Passwornd Required");
             return;
         }
         createUserWithEmailAndPassword(Auth, email, pass).then(() => 
             window.location.replace("/login")
         ).catch((e) => {
-            $("#err_popup").show();
-            $("#err_msg").text(e.message);
+            showErr(e.message);
         })
     });
 

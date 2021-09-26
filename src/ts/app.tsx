@@ -7,6 +7,7 @@ import Form from 'react-bootstrap/Form'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faPlus, faMinus } from "@fortawesome/free-solid-svg-icons";
 import CanvasDraw from 'react-canvas-draw';
+import { Auth, Firebase } from './main';
 
 interface PromptMsg {
   prompts: string[];
@@ -35,37 +36,24 @@ const PromptApp: React.FC<{}> = () => {
 
 
   useEffect(() => {
-    if (ws == null) {
-      console.error("Websocket not initialized");
-      return () => { };
-    }
-
-    ws.onmessage = msg => {
-      let data_bytes = msg.data as Blob;
-      let png_bytes = data_bytes.slice(0,data_bytes.size, "image/png");
-      let src = URL.createObjectURL(png_bytes);
-      if (image_src.length > 0) {
-        URL.revokeObjectURL(image_src);
-      }
-      setSrc(src);
-    }
-
-    ws.onerror = err => {
-      console.error("Websocket errored: ", err);
-      ws?.close();
-      setWs(null);
-      setRunning(false);
-    }
-
     return () => {
-      ws?.close();
-      setWs(null);
-      setRunning(false);
+      if(ws){
+        ws?.close();
+        setWs(null);
+        setRunning(false);
+      }
     }
   }, [ws]);
 
   let pref: PromptForm | undefined;
   let cnv: any | undefined;
+
+  const user = Auth.currentUser;
+
+  if(user == null){
+    console.error("Must be logged in");
+    window.location.replace('/login');
+  }
 
   return <Container>
     <Row className="justify-content-center">
@@ -81,59 +69,88 @@ const PromptApp: React.FC<{}> = () => {
           </Col>
           <Col lg="6">
             <PromptForm ref={r => {pref = (r == null ? undefined : r)}} running={running} onSubmit={(evt: ParamState) => {
-              let ws = new WebSocket(API_ENDPOINT);
-              setWs(ws);
-              setRunning(true);
-              if(cnv?.canvas.drawing){
-                let cv : HTMLCanvasElement = cnv?.canvas.drawing as HTMLCanvasElement;
-                cv.toBlob(blob => {
-                  if(blob == null){
-                    console.error("Error converting input image to raw blob data");
-                    return;
+              user?.getIdToken().then((token) => {
+                let api = new URL(API_ENDPOINT);
+                api.searchParams.set("token", token);
+                let ws = new WebSocket(api);
+
+                ws.onmessage = msg => {
+                  let data_bytes = msg.data as Blob;
+                  let png_bytes = data_bytes.slice(0,data_bytes.size, "image/png");
+                  let src = URL.createObjectURL(png_bytes);
+                  if (image_src.length > 0) {
+                    URL.revokeObjectURL(image_src);
                   }
-                  blob.arrayBuffer().then(buf => {
-                    
-                    const msg: PromptMsg = {
-                      width: evt.width,
-                      height: evt.height,
-                      prompts: evt.prompts.filter((e) => e.enabled).map((a) => a.value),
-                      cutn: evt.cutn,
-                      cut_pow: evt.cut_pow,
-                      mse_weight: evt.mse_weight,
-                      mse_decay: evt.mse_decay,
-                      mse_decay_every: evt.mse_decay_every,
-                      step_size: evt.step_size,
-                      noise_fac: evt.noise_fac,
-                      clip_name: evt.clip_name,
-                      vqgan_name: evt.vqgan_name,
-                      start_img: new Uint8Array(buf),
-                    };
-                    ws.onopen = evt => {
-                      const bin = msgpack.serialize(msg);
-                      ws?.send(bin);
-                    };
-                  });
-                }, "image/png");
-                return;
-              }
-              const msg: PromptMsg = {
-                width: evt.width,
-                height: evt.height,
-                prompts: evt.prompts.filter((e) => e.enabled).map((a) => a.value),
-                cutn: evt.cutn,
-                cut_pow: evt.cut_pow,
-                mse_weight: evt.mse_weight,
-                mse_decay: evt.mse_decay,
-                mse_decay_every: evt.mse_decay_every,
-                step_size: evt.step_size,
-                noise_fac: evt.noise_fac,
-                clip_name: evt.clip_name,
-                vqgan_name: evt.vqgan_name
-              };
-              ws.onopen = evt => {
-                const bin = msgpack.serialize(msg);
-                ws?.send(bin);
-              };
+                  setSrc(src);
+                }
+            
+                ws.onerror = err => {
+                  console.error("Websocket errored: ", err);
+                  ws?.close();
+                  setWs(null);
+                  setRunning(false);
+                }
+
+                setWs(ws);
+                setRunning(true);
+
+                if(cnv?.canvas.drawing){
+                  let cv : HTMLCanvasElement = cnv?.canvas.drawing as HTMLCanvasElement;
+                  cv.toBlob(blob => {
+                    if(blob == null){
+                      console.error("Error converting input image to raw blob data");
+                      return;
+                    }
+                    blob.arrayBuffer().then(buf => {
+                      
+                      const msg: PromptMsg = {
+                        width: evt.width,
+                        height: evt.height,
+                        prompts: evt.prompts.filter((e) => e.enabled).map((a) => a.value),
+                        cutn: evt.cutn,
+                        cut_pow: evt.cut_pow,
+                        mse_weight: evt.mse_weight,
+                        mse_decay: evt.mse_decay,
+                        mse_decay_every: evt.mse_decay_every,
+                        step_size: evt.step_size,
+                        noise_fac: evt.noise_fac,
+                        clip_name: evt.clip_name,
+                        vqgan_name: evt.vqgan_name,
+                        start_img: new Uint8Array(buf),
+                      };
+                      ws.onopen = evt => {
+                        const bin = msgpack.serialize(msg);
+                        ws?.send(bin);
+                      };
+                    });
+                  }, "image/png");
+                  return;
+                }
+                const msg: PromptMsg = {
+                  width: evt.width,
+                  height: evt.height,
+                  prompts: evt.prompts.filter((e) => e.enabled).map((a) => a.value),
+                  cutn: evt.cutn,
+                  cut_pow: evt.cut_pow,
+                  mse_weight: evt.mse_weight,
+                  mse_decay: evt.mse_decay,
+                  mse_decay_every: evt.mse_decay_every,
+                  step_size: evt.step_size,
+                  noise_fac: evt.noise_fac,
+                  clip_name: evt.clip_name,
+                  vqgan_name: evt.vqgan_name
+                };
+                ws.onopen = evt => {
+                  const bin = msgpack.serialize(msg);
+                  ws?.send(bin);
+                };
+              }).catch(err => {
+                console.error(err);
+              }).finally(() => {
+                ws?.close();
+                setRunning(false);
+                setWs(null);
+              })
             }} />
           </Col>
         </Row>
