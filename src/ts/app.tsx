@@ -26,7 +26,7 @@ interface PromptMsg {
   height?: number;
 }
 
-const API_ENDPOINT = "wss://api.doodlebot.ai/api/run";
+const API_ENDPOINT = "wss://test.api.doodlebot.ai/api/run";
 
 const PromptApp: React.FC<{}> = () => {
 
